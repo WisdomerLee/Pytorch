@@ -86,3 +86,4 @@ y_pred = model(X).data.numpy().reshape(-1) # 맨 앞의 차원 하나를 지우�
 sns.scatterplot(x=X_list, y=y_list)
 sns.lineplot(x=X_list, y=y_pred, color='red')
 
+# learning_rate와 NUM_EPOCHS는 실험을 반복하며 loss 값이 0 근처로 떨어지는지를 확인해야 함
