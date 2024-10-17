@@ -98,9 +98,13 @@ for epoch in range(NUM_EPOCHS):
       print("Epoch: {}, Loss{:.4f}".format(epoch, loss.data))
 
 # 모델의 state_dict
+model.state_dict()
 
 # 모델의 state_dict 저장
-
+torch.save(model.state_dict(), 'model_state_dict.pth')
 # 모델 파라미터 불러오기
+model = LinearRegressionTorch(input_size=input_dim, output_size=output_dim)
+model.load_state_dict(torch.load('model_state_dict.pth'))
 
 # 
+model.state_dict()
