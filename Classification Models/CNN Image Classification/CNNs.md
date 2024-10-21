@@ -40,3 +40,5 @@ Computer vision과 관련된 임무를 수행할 때 매우 강력한 도구
 
 파라미터가 많고, 훈련이 많이 필요하고, 연산 비용이 매우 비싼 편
 
+# Convolution을 확인할 수 있는 사이트
+gollnickdata.com/
