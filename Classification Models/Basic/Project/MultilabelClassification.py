@@ -63,12 +63,44 @@ model = MultilabelNetwork(input_size=input_dim, hidden_size=20, output_size=outp
 # loss함수, optimizer 함수 지정하기
 loss_fn = nn.BCEWithLogitsLoss() # 해당 함수는 직접 찾아 볼 것 - Binary Cross Entropy 함수와 Log를 결합하여 만든 Loss 함수, 붙일 수 있는 label의 숫자가 단 2개 뿐이므로 Binary 쪽을 이용함
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01) # 해당 함수 역시 마찬가지- loss의 gradient를 이용하여 weight를 어떻게 업데이트 시키는지는 함수에 따라 달라짐, 또한 모델의 파라미터를 모두 정보를 갖고 있어야 하는데, 모든 nn.Module을 상속받은 모델들은 parameters()라는 함수로 모델이 가진 파라미터들을 확인할 수 있음
 
 losses = []
 slope, bias = [], []
 number_epochs = 100
 
 for epoch in range(number_epochs):
-  
+  for j, (X, y) in enumerate(train_loader):
+    # optimizer에 먼저 계산된 gradient를 초기화
+    optimizer.zero_grad()
+
+    # 모델이 현재 가진 파라미터로 예측
+    y_pred = model(X)
+
+    # 손실 정도 계산
+    loss = loss_fn(y_pred, y)
+    # 손실된 정도를 바탕으로 parameter별 gradient 계산, 적용
+    loss.backward()
+    # weight 업데이트
+    optimizer.step()
+  # 진행률을 확인하기 위해 만들어 두기 - 10 단위씩 묶어서 손실 값이 얼마나 줄어드는지 확인하기 - 훈련이 제대로 되는지 확인하기 위해 필요 - 만약 이 값이 줄어들지 않는다면, 모델의 구조, 함수 등을 바꾸어 적용해야 함
+  if epoch % 10 == 0:
+    print(f'epoch:{epoch}, loss: {loss.data.item()}')
+    losses.append(loss.item())
+
+# loss 값 변화 추적
+sns.scatterplot(x=range(len(losses)), y=losses)
+
+# test 데이터로 모델 평가하기
+with torch.no_grad():
+  y_test_pred = model(X_test).round()
+
+
+y_test_str = [str(i) for i in y_test.detach().numpy()]
+
+most_common_cnt = Counter(y_test_str).most_common()[0][1]
+
+print("Naive Classifier accuracy: {most_common_cnt/len({y_test_str})*100}%")
+
+# 정확도 측정
+accuracy_score(y_test, y_test_pred)
