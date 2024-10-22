@@ -83,7 +83,7 @@ for epoch in range(NUM_EPOCHS):
     inputs, labels = data
     # optimizer의 gradient 초기화
     optimizer.zero_grad()
-    # 모델 에측
+    # 모델 예측
     outputs = model(inputs)
     # loss 계산
     loss = loss_fn(outputs, labels.reshape(-1, 1).float()) # 데이터 타입이 달라서 문제가 생긴다면 outputs.shape, labels.shape등으로 데이터의 타입을 확인, 일치하는지 반드시 확인할 것
@@ -100,4 +100,11 @@ y_test = []
 y_test_pred = []
 for i, data in enumerate(test_loader):
   inputs, y_test_temp = data
-  
+  with torch.no_grad():
+    y_test_hat_temp = model(inputs).round()
+
+  y_test.extend(y_test_temp.numpy())
+  y_test_pred.extend(y_test_hat_temp.numpy())
+
+print(f"Accuracy: {acc*100:.2f}%")
+
