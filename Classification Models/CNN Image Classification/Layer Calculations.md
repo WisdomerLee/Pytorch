@@ -37,9 +37,9 @@ nn.Flatten()으로 될 수 있음
 channel이 아닌, feature를 요구
 in_features: input sample size
 out_features: output sample size
+```
 (class) Linear(in_features: int, out_features: int, bias:bool=True, device: Any | None = None, dtype: Any | None = None)
-
+```
 - 이전 layer의 출력 feature가 다음 layer의 입력 feature가 됨을 기억
 단, layer 사이에 있는 activation layer는 (입, 출력의 데이터 형태 변화에)아무런 영향이 없음을 기억할 것
   
-
