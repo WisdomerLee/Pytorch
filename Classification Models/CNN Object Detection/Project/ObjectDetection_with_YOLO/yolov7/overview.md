@@ -4,3 +4,6 @@ yolov7을 이용하고
 cfg/traing/yolov7.yaml파일을 복사하여
 yolov7-masks.yaml로 바꾸고
 해당 파일에서 nc를 3으로 변경, 
+
+dataset: kaggle.com/datasets/andrewmvd/face-mask-detection
+해당 데이터 파일을 사용 - 813개의 데이터
