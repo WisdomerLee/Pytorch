@@ -62,3 +62,12 @@ Feature maps는 무엇??
 사용되는 색깔들
 색깔 분포
 공통으로 사용되는 표현 같은 것들
+
+# Feature maps와 연관성은?
+알고리즘이 추출하는 것
+Feature map 간의 관계성
+Feature maps Matrix가 있고
+Transposed Feature Maps Matrix (Matrix의 Transpose- 대각성분 기준으로 대칭된 변환)가 있는데
+그 둘을 곱한 결과가 Gram Matrix가 됨
+
+loss 값을 계산할 때 활용
