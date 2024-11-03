@@ -37,10 +37,10 @@ Output
 
 # Evaluation Metrics
 
-Precision@k = $#relevant recommendations \over #recommended items$
+Precision@k = $ number of relevant recommendations \over number of recommended items$
 연관된 아이템들을 추천할 수 있는 능력을 측정
 
-Recall@k $#relevant recommendations \over # all possible relevant items$
+Recall@k $ number of relevant recommendations \over number of all possible relevant items$
 연관성 없는 아이템을 거부할 수 있는 능력을 측정
 
 # Data
