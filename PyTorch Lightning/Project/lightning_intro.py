@@ -60,14 +60,16 @@ class LitLinearRegression(pl.LightningModule):
     self.log('Train_loss', loss, prog_bar = True)
     return loss
 
+early_stop_callback = EarlyStopping(monitor = "train_loss", patience=2, verbose=True, mode='min') # Early Stopping을 적용한다면...? patience는 loss의 변동률, 즉 감소되는 것이 훈련 n번동안 드러나지 않을 경우, mode는 loss가 충분히 작은 상태로 들어갔을 때 멈출 것
 
 model = LitLinearRegression(input_size=1, output_size=1)
 
-trainer = pl.Trainer(accelerate='gpu', devices=1, max_epochs=500, log_every_n_steps=2)
+trainer = pl.Trainer(accelerate='gpu', devices=1, max_epochs=500, log_every_n_steps=2, callbacks=[early_stop_callback])
 trainer.fit(model=model, train_dataloaders=train_loader)
 
 trainer.current_epoch
 
 for parameter in model.parameters():
   print(parameter)
+
 
