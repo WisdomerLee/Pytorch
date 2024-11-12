@@ -25,3 +25,74 @@ transform_super = transforms.Compose([
 train_ds = torchvision.datasets.ImageFolder(root='data/train', transform=transform_super)
 test_ds = torchvision.datasets.ImageFolder(root='data/test', transform=transform_super)
 
+train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE)
+test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE)
+
+class SupervisedNet(nn.Module):
+  def __init__(self, n_super_classes):
+    super().__init__()
+    self.conv1 = nn.Conv2(1, 6, 3)
+    self.pool = nn.MaxPool2d(2,2)
+    self.conv2 = nn.Conv2(6, 16, 3)
+    self.fc1 = nn.Linear(16*6*6, 128)
+    self.fc2 = nn.Linear(128, 64)
+    self.fc_out_super = nn.Linear(64, n_super_classes)
+    self.relu = nn.ReLU()
+    self.output_layer_super = nn.Sigmoid()
+
+  def backbone(self, x):
+    x = self.conv1(x)
+    x = self.relu(x)
+    x = self.pool(x)
+    x = self.conv2(x)
+    x =  self.relu(x)
+    x = self.pool(x)
+    x = torch.flatten(x, 1)
+    x = self.fc1(x)
+    x = self.relu(x)
+    x = self.fc2(x)
+    x = self.relu(x)
+    return x
+
+  def forward(self, x):
+    x = self.backbone(x)
+    x = self.fc_out_super(x)
+    x = self.output_layer_super(x)
+    return x
+
+
+model = SupervisedNet(n_super_classes=2)
+model.train()
+
+criterion_supervised = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+train_losses = []
+for epoch in range(NUM_EPOCHS):
+  train_loss = 0
+  for i, (supervised_data) in enumerate(train_loader):
+    X_super, y_super = supervised_data
+    
+    optimizer.zero_grad()
+    y_super_pred = model(X_super)
+    loss = criterion_supervised(y_super_pred, y_super)
+    loss.backward()
+    optimizer.step()
+
+    train_loss += loss.item()
+    print(f"Epoch {epoch}: Loss {train_loss}")
+
+
+sns.linepolt(x=list(range(len(train_losses))), y=train_losses)
+y_test_preds = []
+y_test_trues = []
+
+with torch.no_grad():
+  for (X_test, y_test) in test_loader:
+    y_test_pred = model(X_test)
+    y_test_pred_argmax = torch.argmax(y_test_pred, axis=1)
+    y_test_preds.extend(y_test_pred_ragmax.numpy())
+    y_test_trues.extend(y_test.numpy())
+
+
+accuracy_score(y_pred=y_test_preds, y_true=y_test_trues)
