@@ -14,7 +14,7 @@ import seaborn as sns
 BATCH_SIZE = 10
 DEVICE = torch.device("cuda:0" if torch.cuda.isavailable() else "cpu")
 NUM_EPOCHS = 50
-LOSS_FACTOR_SELFSUPERVISED=0
+LOSS_FACTOR_SELFSUPERVISED=1
 
 transform_super = transforms.Compose([
   transforms.Resize(32),
@@ -37,17 +37,16 @@ class UnlabledDataset(Dataset):
   def __getitem__(self, idx):
     img = Image.open(self.images_full_path_names[idx])
     # random sesemi transformations
-    transformation_class_label = random.randint(0, len(self.sesemi_transformations))
+    transformation_class_label = random.randint(0, len(self.sesemi_transformations)-1)
     # 랜덤으로 선택된 변환을 적용하기
     angle = self.sesemi_transformations[transformation_class_label]
     data = transform_super(img)
-    data = transforms.function.rotate(img=data, angle=angle)
+    data = transforms.functional.rotate(img=data, angle=angle)
     return data, transformation_class_label
 
 # label이 없는 DataSet 지정하기 - UnlabeledDataset 클래스를 이용할 것
 folder_path = 'data/unlabeled'
 unlabeled_ds = UnlabeledDataset(folder_path)
-
 
 
 train_ds = torchvision.datasets.ImageFolder(root='data/train', transform=transform_super)
@@ -112,30 +111,37 @@ criterion_selfsupervised = nn.CrossEntropyLoss()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-train_losses = []
+train_losses_self = []
 for epoch in range(NUM_EPOCHS):
   train_loss = 0
-  for i, (supervised_data) in enumerate(train_loader):
+  # data 얻기!
+  data_loaders = zip(train_loader, unlabeled_loader)
+  
+  for i, (supervised_data, selfsupervised_data) in enumerate(data_loaders):
     X_super, y_super = supervised_data
+    X_selfsuper, y_selfsuper = selfsupervised_data
     
     optimizer.zero_grad()
-    y_super_pred = model(X_super)
-    loss = criterion_supervised(y_super_pred, y_super)
+    y_super_pred, y_selfsuper_pred = model(X_super, X_selfsuper)
+    loss_super = criterion_supervised(y_super_pred, y_super)
+    loss_selfsuper = criterion_selfsupervised(y_selfsuper_pred, y_selfsuper)
+    loss = loss_super + loss_selfsuper * LOSS_FACTOR_SELFSUPERVISED # loss를 합칠 때는 반드시 비율이 필요함...
     loss.backward()
     optimizer.step()
 
     train_loss += loss.item()
-    print(f"Epoch {epoch}: Loss {train_loss}")
+    
+  train_losses_self.append(train_loss)
+  print(f"Epoch {epoch}: Loss {train_loss}")
 
-
-sns.linepolt(x=list(range(len(train_losses))), y=train_losses)
+sns.linepolt(x=list(range(len(train_losses_self))), y=train_losses_self)
 y_test_preds = []
 y_test_trues = []
 
 with torch.no_grad():
   for (X_test, y_test) in test_loader:
-    y_test_pred = model(X_test)
-    y_test_pred_argmax = torch.argmax(y_test_pred, axis=1)
+    y_test_pred = model(X_test, X_test)
+    y_test_pred_argmax = torch.argmax(y_test_pred[0], axis=1)
     y_test_preds.extend(y_test_pred_ragmax.numpy())
     y_test_trues.extend(y_test.numpy())
 
