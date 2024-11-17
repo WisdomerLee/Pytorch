@@ -104,6 +104,16 @@ sns.lineplot(x=list(range(len(train_losses))), y=train_losses)
 with torch.no_grad():
   for X_batch, y_batch in test_loader:
     y_test_pred_log = model(X_batch)
-    
+    y_test_pred = torch.argmax(y_test_pred_log, dim=1) # 실제로 모델이 계산해주는 것은 각 클래스별 확률을 계산하기 때문에 실제로 값을 끌어내기 위해서는 그 중에서 가장 확률이 높은 것을 끌어내야 함
+
+y_test_pred_np = y_test_pred.squeeze().cpu().numpy()
+
+acc = accuracy_score(y_pred=y_test_pred_np, y_true = y_test)
+
+f"The accuracy of the model is {np.round(acc, 3)*100} %"
+
+most_common_cnt = Counter(y_test).most_common()[0][1]
+print(f"Naive Classifier: {np.round(most_common_cnt / len(y_test)* 100, 1)} %")
+
 
     
