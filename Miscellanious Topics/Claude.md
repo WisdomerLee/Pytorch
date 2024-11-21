@@ -23,5 +23,14 @@ Chatbot Arena는 모델을 무작위로 2개를 골라 해당 모델을 기반�
 
 실제 사용자 평가가 들어가기 때문에 평가에 좋은 방법 중에 하나
 
-# Claude
-Double-Blind Study
+# Double-Blind Study
+환자가 실제 약과 가짜 약을 받음
+그리고 실제 건강이 회복됨을 확인함
+그런데 과학자, 환자 모두 어느 쪽이 진짜, 가짜 약을 받은 것인지는 알 수 없음!
+
+대표적인 의학 실험의 정석이라고 함
+
+# Leaderboard
+LMSYS Chatbot Arena Leaderboard
+Chatbot Arena는 LLM을 평가하는 open platform
+30만 명의 사람들이 평가한 모델 순위가 있음
