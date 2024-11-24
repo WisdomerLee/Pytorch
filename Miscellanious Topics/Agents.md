@@ -114,3 +114,28 @@ Task(
 
 )
 ```
+
+# 다른 LLM 이용
+
+llm 모델 설정
+파라미터로 전달
+
+Groq은 무료로 활용할 수 있음!, 그래서 테스트용도로 쓰기 적합함
+
+```
+from langchain_groq import ChatGroq
+
+llm = ChatGroq(temperature=0,
+              model_name=MODEL,
+              api_key=os.environ["GROQ_API_KEY"])
+
+planner = Agent(
+    role="에이전트의 행동 지침 설정",
+    goal="에이전트의 목표 설정",
+    backstory="에이전트의 배경 설정",
+    allow_delegation=False,
+    llm=llm,
+    verbose=True
+)
+```
+
