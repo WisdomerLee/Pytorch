@@ -3,16 +3,36 @@
 # google cloud의 storage로 들어가서 - 들어가면 먼저 프로젝트를 만들어야 함
 # 프로젝트를 만든 뒤에 bucket을 만들어서
 # 이름을 짓고, bucket을 만들면 모델의 파라미터 저장된 부분을 해당 storage쪽에 올릴 수 있음
+# 프로젝트의 bucket의 storage에 파일을 올렸다면
+# 해당 파일에 대한 접근 권한을 별도로 설정해주어야 함 아무나 사용할 수 있게 한다면...? > 나중에 문제가 발생할 수 있으므로 반드시!!
+# 모든 파일에 대한 접근 권한이 아닌, 특정한 파일에만 접근할 수 있도록 수정할 것 > 
+# bucket에서 object의 내용으로 가서 파일을 누르면, 파일의 접근권한을 별도로 설정할 수 있는데
+# 우리는 프로젝트로 접근할 때 별도의 사용자 인증 없이 접근하게 한다면 > entity1에 public, name1에 allUsers, access1에 reader로 설정하기!
+# 읽기 전용으로 접근 권한을 두게 해야 함!
+# 그렇게 저장하면 public access에 해당하는 url이 생성되는데 해당 url을 이용하여 해당 모델의 파라미터를 다운 받아 사용할 수 있도록 설정하면 됨!
+
 
 
 from flask import Flask
 from model_class import MultiClassNet # 모델을 불러오기 위해서 모델의 클래스를 불러오기
 import torch
 import json
+import requests
+
+# 모델 파라미터 다운받기!
+URL = '' # 여기에 아까 위에서 설명한 bucket에 있던 url을 여기에 넣어야 함!!
+r = requests.get(URL)
+local_file_path = 'model_iris_from_gcp.pt'
+
+with open(local_file_path, 'wb') as f:
+  f.write(r.content)
+  f.close()
+
 
 # 모델 객체 생성하기
 model = MultiClassNet(HIDDEN_FEATURES=6, NUM_CLASSES=3, NUM_FEATURES=4)
-local_file_path = 'model_iris.pt'
+# local_file_path = 'model_iris.pt' # 이제 로컬이 아닌 클라우드에서 weights를 받아서 사용할 것이므로...!
+
 model.load_state_dict(torch.load(local_file_path)) # 저장된 모델의 학습 파라미터를 가져오기!
 
 
